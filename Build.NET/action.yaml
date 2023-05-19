@@ -1,0 +1,51 @@
+name: Build
+description: Build Container Image and Save to GitHub Container Registry
+
+inputs:
+  PROJECT_PATH:
+    description: 'Path to project'
+    required: false
+    default: './src'
+  SERVICE_NAME:
+    description: 'Name of service'
+    required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Transform repository name
+      id: repo
+      run: |
+        echo "REPO_OWNER=$(echo '${{ github.repository_owner }}' | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.x
+
+    - name: Restore packages
+      shell: bash
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GHCR_PAT }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./src/Dockerfile
+        push: true
+        tags: |
+          ghcr.io/${{ env.REPO_OWNER }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          ghcr.io/${{ env.REPO_OWNER }}/${{ env.SERVICE_NAME }}:latest

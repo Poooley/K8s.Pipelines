@@ -1,0 +1,56 @@
+name: Build and Deploy
+description: Build Container Image and Save to GitHub Container Registry and Deploy to Kubernetes Cluster using Helm
+
+inputs:
+  SERVICE_NAME:
+    description: 'Name of service'
+    required: true
+  INGRESS_PATH:
+    description: 'Ingress path'
+    required: true
+  CHART_IMG_NAME:
+    description: 'Chart image Name'
+    required: false
+    default: 'api-chart'
+  CHART_VERSION:
+    description: 'Chart version'
+    required: false
+    default: '1.0.0'
+
+env:
+  CHART_IMG: ghcr.io/poooley/${{ inputs.CHART_IMG }}
+  
+jobs:
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:   
+    - name: Set kubeconfig
+      run: |
+        echo "${{ secrets.KUBECONFIG }}" >> ./kubeconfig
+        echo "KUBECONFIG=./kubeconfig">> $GITHUB_ENV
+
+    - name: Transform repository name
+      id: repo
+      run: |
+        echo "REPO_OWNER=$(echo '${{ github.repository_owner }}' | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
+      shell: bash
+      
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        token: ${{ secrets.ACTION_TOKEN }}
+      id: install
+
+    - name: login to acr using helm
+      run: |
+        echo ${{ secrets.ACTION_TOKEN }} | helm registry login ${{ env.CHART_IMG }} --username ${{ github.repository_owner }} --password-stdin
+
+    - name: Fetch Helm chart from registry
+      run: |
+        helm pull oci://${{ env.CHART_IMG }} --version ${{ env.CHART_VERSION }}
+
+    - name: Install or upgrade Helm chart
+      run: |
+        helm upgrade --install ${{ env.SERVICE_NAME }} ${{ env.CHART_IMG_NAME }}-${{ env.CHART_VERSION }}.tgz --set image.repository=ghcr.io/${{ env.REPO_OWNER }}/${{ env.SERVICE_NAME }},image.tag=latest,ingress.path=${{ env.INGRESS_PATH }}
