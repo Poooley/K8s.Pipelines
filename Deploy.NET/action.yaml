@@ -8,18 +8,15 @@ inputs:
   INGRESS_PATH:
     description: 'Ingress path'
     required: true
-  CHART_IMG_NAME:
-    description: 'Chart image Name'
+  CHART_IMG:
+    description: 'Chart image'
     required: false
-    default: 'api-chart'
+    default: 'ghcr.io/poooley/api-chart'
   CHART_VERSION:
     description: 'Chart version'
     required: false
     default: '1.0.0'
 
-env:
-  CHART_IMG: ghcr.io/poooley/${{ inputs.CHART_IMG }}
-  
 jobs:
   deploy:
     needs: build
@@ -53,4 +50,4 @@ jobs:
 
     - name: Install or upgrade Helm chart
       run: |
-        helm upgrade --install ${{ env.SERVICE_NAME }} ${{ env.CHART_IMG_NAME }}-${{ env.CHART_VERSION }}.tgz --set image.repository=ghcr.io/${{ env.REPO_OWNER }}/${{ env.SERVICE_NAME }},image.tag=latest,ingress.path=${{ env.INGRESS_PATH }}
+        helm upgrade --install ${{ env.SERVICE_NAME }} ./*.tgz --set image.repository=ghcr.io/${{ env.REPO_OWNER }}/${{ env.SERVICE_NAME }},image.tag=latest,ingress.path=${{ env.INGRESS_PATH }}
