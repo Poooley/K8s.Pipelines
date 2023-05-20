@@ -17,11 +17,9 @@ inputs:
     required: false
     default: 'poooley'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
+runs:
+  using: 'composite'
+  steps:
     - name: Checkout code
       uses: actions/checkout@v2
 

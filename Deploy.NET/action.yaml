@@ -1,5 +1,5 @@
-name: Build and Deploy
-description: Build Container Image and Save to GitHub Container Registry and Deploy to Kubernetes Cluster using Helm
+name: Deploy to Kubernetes
+description: Deploy to Kubernetes Cluster using Helm
 
 inputs:
   SERVICE_NAME:
@@ -25,15 +25,13 @@ inputs:
   REPO_OWNER:
     description: 'The Github Container Registry Owner in Lowercase'
     required: false
-    default: 'poooley'    
+    default: 'poooley'
 
-jobs:
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    
-    steps:   
+runs:
+  using: 'composite'
+  steps:   
     - name: Set kubeconfig
+      shell: bash
       run: |
         echo "${{ inputs.KUBECONFIG }}" >> ./kubeconfig
         echo "KUBECONFIG=./kubeconfig">> $GITHUB_ENV
@@ -41,17 +39,19 @@ jobs:
     - name: Set up Helm
       uses: azure/setup-helm@v3
       with:
-        token: ${{ inputs.ACTION_TOKEN }}
-      id: install
+        version: 'v3.7.0'
 
     - name: login to acr using helm
+      shell: bash
       run: |
         echo ${{ inputs.DOCKER_TOKEN }} | helm registry login ${{ inputs.CHART_IMG }} --username ${{ inputs.repository_owner }} --password-stdin
 
     - name: Fetch Helm chart from registry
+      shell: bash
       run: |
         helm pull oci://${{ inputs.CHART_IMG }} --version ${{ inputs.CHART_VERSION }}
 
     - name: Install or upgrade Helm chart
+      shell: bash
       run: |
         helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=latest,ingress.path=${{ inputs.INGRESS_PATH }}
