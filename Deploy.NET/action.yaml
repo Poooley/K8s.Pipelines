@@ -32,6 +32,7 @@ runs:
   using: 'composite'
   steps:   
     - name: Set kubeconfig and Helm Experimental flag
+      shell: bash
       run: |
         echo "${{ inputs.KUBECONFIG }}" >> ./kubeconfig
         echo "KUBECONFIG=./kubeconfig">> $GITHUB_ENV
