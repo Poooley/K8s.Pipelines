@@ -46,5 +46,5 @@ runs:
         file: ./src/Dockerfile
         push: true
         tags: |
-          ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }}:${{ github.run_number }}
           ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }}:latest
