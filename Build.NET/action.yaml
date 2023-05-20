@@ -2,19 +2,20 @@ name: Build
 description: Build Container Image and Save to GitHub Container Registry
 
 inputs:
-  PROJECT_PATH:
-    description: 'Path to project'
-    required: false
-    default: './src'
   SERVICE_NAME:
     description: 'Name of service'
     required: true
   DOCKER_TOKEN:
     description: 'The GitHub Container Registry Personal Access Token'
     required: true
+  PROJECT_PATH:
+    description: 'Path to project'
+    required: false
+    default: './src'
   REPO_OWNER:
     description: 'The Github Container Registry Owner in Lowercase'
-    required: true    
+    required: false
+    default: 'poooley'
 
 jobs:
   build:
@@ -31,7 +32,7 @@ jobs:
 
     - name: Restore packages
       shell: bash
-      run: dotnet restore ${{ env.PROJECT_PATH }}
+      run: dotnet restore ${{ inputs.PROJECT_PATH }}
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v1
