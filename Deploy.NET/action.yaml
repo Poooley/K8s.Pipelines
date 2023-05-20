@@ -8,6 +8,12 @@ inputs:
   INGRESS_PATH:
     description: 'Ingress path'
     required: true
+  DOCKER_TOKEN:
+    description: 'The GitHub Container Registry Personal Access Token'
+    required: true
+  KUBECONFIG:
+    description: 'The Kubernetes config file'
+    required: true
   CHART_IMG:
     description: 'Chart image'
     required: false
@@ -16,6 +22,10 @@ inputs:
     description: 'Chart version'
     required: false
     default: '1.0.0'
+  REPO_OWNER:
+    description: 'The Github Container Registry Owner in Lowercase'
+    required: false
+    default: 'poooley'    
 
 jobs:
   deploy:
@@ -25,29 +35,23 @@ jobs:
     steps:   
     - name: Set kubeconfig
       run: |
-        echo "${{ secrets.KUBECONFIG }}" >> ./kubeconfig
+        echo "${{ inputs.KUBECONFIG }}" >> ./kubeconfig
         echo "KUBECONFIG=./kubeconfig">> $GITHUB_ENV
 
-    - name: Transform repository name
-      id: repo
-      run: |
-        echo "REPO_OWNER=$(echo '${{ github.repository_owner }}' | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
-      shell: bash
-      
     - name: Set up Helm
       uses: azure/setup-helm@v3
       with:
-        token: ${{ secrets.ACTION_TOKEN }}
+        token: ${{ inputs.ACTION_TOKEN }}
       id: install
 
     - name: login to acr using helm
       run: |
-        echo ${{ secrets.ACTION_TOKEN }} | helm registry login ${{ env.CHART_IMG }} --username ${{ github.repository_owner }} --password-stdin
+        echo ${{ inputs.DOCKER_TOKEN }} | helm registry login ${{ inputs.CHART_IMG }} --username ${{ inputs.repository_owner }} --password-stdin
 
     - name: Fetch Helm chart from registry
       run: |
-        helm pull oci://${{ env.CHART_IMG }} --version ${{ env.CHART_VERSION }}
+        helm pull oci://${{ inputs.CHART_IMG }} --version ${{ inputs.CHART_VERSION }}
 
     - name: Install or upgrade Helm chart
       run: |
-        helm upgrade --install ${{ env.SERVICE_NAME }} ./*.tgz --set image.repository=ghcr.io/${{ env.REPO_OWNER }}/${{ env.SERVICE_NAME }},image.tag=latest,ingress.path=${{ env.INGRESS_PATH }}
+        helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=latest,ingress.path=${{ inputs.INGRESS_PATH }}
