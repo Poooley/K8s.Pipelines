@@ -30,7 +30,10 @@ inputs:
 
 runs:
   using: 'composite'
-  steps:   
+  steps:  
+      # Checkout
+    - uses: actions/checkout@v3
+     
     - name: Set Helm Experimental flag
       shell: bash
       run: |
@@ -46,8 +49,7 @@ runs:
       run: |
         echo ${{ inputs.DOCKER_TOKEN }} | helm registry login ${{ inputs.CHART_IMG }} --username ${{ inputs.REPO_OWNER }} --password-stdin
 
-    # Checkout
-    - uses: actions/checkout@v3
+
 
     - name: Fetch Helm chart from registry
       shell: bash
