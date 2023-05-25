@@ -56,4 +56,4 @@ runs:
     - name: Install or upgrade Helm chart
       shell: bash
       run: |
-        helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=${{ github.run_number }},ingress.path=${{ inputs.INGRESS_PATH }}
+        helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz -f ./values.yaml --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=${{ github.run_number }}
