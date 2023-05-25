@@ -57,4 +57,6 @@ runs:
     - name: Install or upgrade Helm chart
       shell: bash
       run: |
-        helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz --kubeconfig=${{ inputs.KUBECONFIG }} -f ${{ inputs.VALUES_FILE }} --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=${{ github.run_number }}
+        echo "${{ inputs.KUBECONFIG }}" >> ./kubeconfig
+        echo "KUBECONFIG=./kubeconfig">> $GITHUB_ENV
+        helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz -f ${{ inputs.VALUES_FILE }} --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=${{ github.run_number }}
