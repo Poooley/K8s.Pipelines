@@ -31,11 +31,9 @@ inputs:
 runs:
   using: 'composite'
   steps:   
-    - name: Set kubeconfig and Helm Experimental flag
+    - name: Set Helm Experimental flag
       shell: bash
       run: |
-        echo "${{ inputs.KUBECONFIG }}" >> ./kubeconfig
-        echo "KUBECONFIG=./kubeconfig">> $GITHUB_ENV
         echo "HELM_EXPERIMENTAL_OCI=1">> $GITHUB_ENV
 
     - name: Set up Helm
@@ -59,4 +57,4 @@ runs:
     - name: Install or upgrade Helm chart
       shell: bash
       run: |
-        helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz -f ${{ inputs.VALUES_FILE }} --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=${{ github.run_number }}
+        helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz --kubeconfig=${{ inputs.KUBECONFIG }} -f ${{ inputs.VALUES_FILE }} --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=${{ github.run_number }}
