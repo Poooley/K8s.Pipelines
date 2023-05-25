@@ -30,10 +30,7 @@ inputs:
 
 runs:
   using: 'composite'
-  steps:  
-      # Checkout
-    - uses: actions/checkout@v3
-     
+  steps:   
     - name: Set Helm Experimental flag
       shell: bash
       run: |
@@ -49,8 +46,9 @@ runs:
       run: |
         echo ${{ inputs.DOCKER_TOKEN }} | helm registry login ${{ inputs.CHART_IMG }} --username ${{ inputs.REPO_OWNER }} --password-stdin
 
-
-
+    # Checkout
+    - uses: actions/checkout@v3
+    
     - name: Fetch Helm chart from registry
       shell: bash
       run: |
@@ -69,4 +67,4 @@ runs:
           exit 1
         fi
 
-        helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz -f ${{ inputs.VALUES_FILE }} --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=${{ github.run_number }}
+        helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz --kubeconfig=./kubeconfig -f ${{ inputs.VALUES_FILE }} --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=${{ github.run_number }}
