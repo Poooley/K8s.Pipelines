@@ -5,9 +5,6 @@ inputs:
   SERVICE_NAME:
     description: 'Name of service'
     required: true
-  INGRESS_PATH:
-    description: 'Ingress path'
-    required: true
   DOCKER_TOKEN:
     description: 'The GitHub Container Registry Personal Access Token'
     required: true
