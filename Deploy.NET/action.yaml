@@ -46,17 +46,25 @@ runs:
       run: |
         echo ${{ inputs.DOCKER_TOKEN }} | helm registry login ${{ inputs.CHART_IMG }} --username ${{ inputs.REPO_OWNER }} --password-stdin
 
+    # Checkout
+    - uses: actions/checkout@v3
+
     - name: Fetch Helm chart from registry
       shell: bash
       run: |
         helm pull oci://${{ inputs.CHART_IMG }} --version ${{ inputs.CHART_VERSION }}
-
-    # Checkout
-    - uses: actions/checkout@v3
     
     - name: Install or upgrade Helm chart
       shell: bash
       run: |
         echo "${{ inputs.KUBECONFIG }}" >> ./kubeconfig
         echo "KUBECONFIG=./kubeconfig">> $GITHUB_ENV
+
+        if [ -f "./kubeconfig" ]; then
+          echo "Kubeconfig exists"
+        else
+          echo "Kubeconfig does not exist"
+          exit 1
+        fi
+
         helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz -f ${{ inputs.VALUES_FILE }} --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=${{ github.run_number }}
