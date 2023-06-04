@@ -60,6 +60,10 @@ runs:
       run: |
         echo "${{ inputs.KUBECONFIG }}" >> ./kubeconfig
 
-        echo "Values file contents:"
+        if [ ! -f "${inputs.VALUES_FILE}" ]; then
+            echo "ERROR: Values file '${inputs.VALUES_FILE}' does not exist." >&2
+            exit 1
+        fi
+        
         echo "$(cat ${inputs.VALUES_FILE})"
         helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz --kubeconfig=./kubeconfig -f ${{ inputs.VALUES_FILE }} --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=${{ github.run_number }}
