@@ -60,8 +60,8 @@ runs:
       run: |
         echo "${{ inputs.KUBECONFIG }}" >> ./kubeconfig
 
-        if [ ! -f "${inputs.VALUES_FILE}" ]; then
-            echo "ERROR: Values file '${inputs.VALUES_FILE}' does not exist." >&2
+        if [ ! -f "${INPUTS_VALUES_FILE}" ]; then
+            echo "ERROR: Values file '${INPUTS_VALUES_FILE}' does not exist." >&2
             exit 1
         fi
 
