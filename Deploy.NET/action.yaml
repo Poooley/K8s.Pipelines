@@ -21,7 +21,7 @@ inputs:
   CHART_VERSION:
     description: 'Chart version'
     required: false
-    default: '1.0.0'
+    default: '1.1.0'
   REPO_OWNER:
     description: 'The Github Container Registry Owner in Lowercase'
     required: false
