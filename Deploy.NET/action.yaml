@@ -60,6 +60,6 @@ runs:
       run: |
         echo "${{ inputs.KUBECONFIG }}" >> ./kubeconfig
 
-        echo "Values file: cat ${{ inputs.VALUES_FILE }}"
-
+        echo "Values file contents:"
+        echo "$(cat ${inputs.VALUES_FILE})"
         helm upgrade --install ${{ inputs.SERVICE_NAME }} ./*.tgz --kubeconfig=./kubeconfig -f ${{ inputs.VALUES_FILE }} --set image.repository=ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }},image.tag=${{ github.run_number }}
