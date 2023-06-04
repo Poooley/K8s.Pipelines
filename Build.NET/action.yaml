@@ -39,7 +39,7 @@ runs:
       uses: docker/build-push-action@v2
       with:
         context: .
-        file: ./src/Dockerfile
+        file: ${{ inputs.PROJECT_PATH }}/Dockerfile
         push: true
         tags: |
           ghcr.io/${{ inputs.REPO_OWNER }}/${{ inputs.SERVICE_NAME }}:${{ github.run_number }}
